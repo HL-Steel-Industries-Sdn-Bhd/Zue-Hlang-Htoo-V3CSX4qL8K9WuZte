@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Profile</title>
+    <style>
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Portrait (Mobile) Layout - 16:8 ratio */
+        @media (orientation: portrait) {
+            .grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                grid-gap: 15px;
+                padding: 15px;
+            }
+            
+            .logo-container {
+                grid-column: 1 / span 2;
+                text-align: center;
+                margin-bottom: 15px;
+            }
+            
+            .profile-container {
+                grid-column: 1;
+                text-align: center;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+            }
+            
+            .info-container {
+                grid-column: 2;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+            }
+            
+            .marquee-container {
+                grid-column: 1 / span 2;
+                margin: 15px 0;
+            }
+            
+            /* 修改点 1: 左右排列 Total / Remaining */
+            .points-container {
+                grid-column: 1 / span 2;
+                display: flex;
+                justify-content: space-between;
+                margin: 15px 0;
+            }
+
+            .point-box {
+                width: 48%;
+                text-align: center;
+            }
+            
+            .buttons-container {
+                grid-column: 1 / span 2;
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                grid-gap: 15px;
+            }
+        }
+
+        /* ----------------------------- */
+        /* FIXED LANDSCAPE LAYOUT BELOW */
+        /* ----------------------------- */
+
+        @media (orientation: landscape) {
+            .grid {
+                display: grid;
+                grid-template-columns: repeat(16, 1fr);
+                grid-template-rows: repeat(10, 1fr);
+                grid-gap: 10px;
+                height: 90vh;
+                padding: 20px;
+            }
+
+            /* B: Profile Picture */
+            .profile-container {
+                grid-column: 1 / span 3;
+                grid-row: 1;
+                text-align: center;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                position: relative;
+            }
+
+            /* C: Employee Info */
+            .info-container {
+                grid-column: 4 / span 4;
+                grid-row: 1;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                padding-left: 20px;
+            }
+
+            /* A: LOGO — centered */
+            .logo-container {
+                grid-column: 8 / span 2;
+                grid-row: 1;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            /* E + F: Total & Remaining Points (right aligned) */
+            .points-container {
+                grid-column: 11 / span 6;
+                grid-row: 1;
+                display: flex;
+                justify-content: flex-end;
+                align-items: center;
+                gap: 15px;
+            }
+
+            .total-point, .remaining-point {
+                width: 100%;
+            }
+
+            /* Marquee */
+            .marquee-container {
+                grid-column: 1 / span 16;
+                grid-row: 2;
+                margin: 10px 0;
+            }
+
+            /* Buttons (prize area fully shown) */
+            .buttons-container {
+                grid-column: 1 / span 16;
+                grid-row: 3 / span 8;
+                display: grid;
+                grid-template-columns: repeat(8, 1fr);
+                grid-template-rows: repeat(4, 1fr);
+                grid-gap: 15px;
+            }
+        }
+
+        /* Common Styles */
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .logo {
+            max-width: 120px;
+            height: auto;
+            border-radius: 10px;
+        }
+
+        /* 修改点1: 将圆形头像改为正方形自适应 */
+        .profile-pic {
+            width: 100%;
+            max-width: 120px; /* 限制最大尺寸 */
+            height: auto;
+            aspect-ratio: 1 / 1; /* 保持正方形比例 */
+            border: 4px solid #fff;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            object-fit: cover; /* 确保图片填充而不变形 */
+            margin: 0 auto;
+            display: block;
+            border-radius: 8px; /* 可选：轻微的圆角，如需要纯直角可改为 0 */
+        }
+
+        /* 修改点2: 确保profile容器也是正方形 */
+        .profile-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 修改点3: 竖屏下的profile容器尺寸 */
+        @media (orientation: portrait) {
+            .profile-container {
+                min-height: 120px;
+            }
+        }
+
+        /* 修改点4: 横屏下的profile容器尺寸 */
+        @media (orientation: landscape) {
+            .profile-container {
+                height: 100%;
+            }
+        }
+
+        .name {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .department, .position {
+            font-size: 1.2em;
+            color: #7f8c8d;
+            margin: 5px 0;
+        }
+
+        .marquee {
+            background: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            padding: 10px;
+            border-radius: 8px;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .marquee-content {
+            display: inline-block;
+            animation: marquee 30s linear infinite;
+            padding-left: 100%;
+        }
+
+        @keyframes marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-100%); }
+        }
+
+        .point-card {
+            text-align: center;
+            padding: 25px 15px;
+        }
+
+        .point-label {
+            font-size: 1.1em;
+            color: #7f8c8d;
+            margin-bottom: 10px;
+        }
+
+        .point-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #e74c3c;
+        }
+
+        /* 修改点 2: Total / Point 拆成两行 */
+        .point-label div {
+            line-height: 1.2em;
+        }
+
+        .button {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 20px;
+            border-radius: 12px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        }
+
+        .button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(52, 152, 219, 0.6);
+        }
+
+        .button:active {
+            transform: translateY(-1px);
+        }
+
+        .hidden-form {
+            display: none;
+        }
+
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            font-size: 1.5em;
+            color: #333;
+        }
+
+        /* 图片上传相关样式 */
+        .profile-upload-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .upload-btn {
+            padding: 10px 15px;
+            background: #1976d2;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            z-index: 2;
+            position: absolute;
+            font-size: 14px;
+        }
+
+        .edit-icon {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            width: 24px;
+            height: 24px;
+            opacity: 0.7;
+            cursor: pointer;
+            display: none;
+            z-index: 3;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            padding: 4px;
+        }
+
+        @media (max-width: 768px) {
+            .name { font-size: 2em; }
+            .point-value { font-size: 2em; }
+            .button { padding: 15px; font-size: 1em; }
+            .profile-pic {
+                max-width: 100px;
+            }
+            .upload-btn {
+                padding: 8px 12px;
+                font-size: 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .name { font-size: 1.8em; }
+            .profile-pic { 
+                max-width: 80px;
+            }
+            .button { padding: 12px; font-size: 0.9em; }
+            .edit-icon {
+                width: 20px;
+                height: 20px;
+                bottom: 3px;
+                right: 3px;
+            }
+        }
+
+        /* 修改点5: 小屏幕下的正方形适配 */
+        @media (max-width: 360px) {
+            .profile-pic {
+                max-width: 70px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="loading" class="loading">Loading...</div>
+
+    <div class="container">
+        <div class="grid">
+
+            <!-- Logo -->
+            <div class="logo-container card">
+                <img src="" class="logo">
+            </div>
+
+            <!-- Profile -->
+            <div class="profile-container card">
+                <div class="profile-upload-container">
+                    <img src="" class="profile-pic" id="profileImg" alt="Profile Picture">
+                    <button class="upload-btn" id="uploadBtn">Upload Photo</button>
+                    <img class="edit-icon" id="editIcon" src="" alt="Edit">
+                </div>
+            </div>
+
+            <!-- Info -->
+            <div class="info-container card">
+                <div class="name" id="employeeNameDisplay">Zue Hlang Htoo</div>
+                <div class="department">Department: Production </div>
+                <div class="position">Position: Polisher </div>
+            </div>
+
+            <!-- Marquee -->
+            <div class="marquee-container">
+                <div class="marquee card">
+                    <div class="marquee-content">
+                        🎉 Announcement: Monthly Point System Update - New rewards added!
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total & Remaining -->
+            <div class="points-container">
+                <div class="point-card card total-point point-box">
+                    <div class="point-label"><div>Total</div><div>Point</div></div>
+                    <div class="point-value" id="totalPoint">0</div>
+                </div>
+
+                <div class="point-card card remaining-point point-box">
+                    <div class="point-label"><div>Remaining</div><div>Point</div></div>
+                    <div class="point-value" id="remainingPoint">0</div>
+                </div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="buttons-container">
+                <button class="button" onclick="viewRanking()">View Ranking</button>
+
+                <!-- Redeem Reward 加上 user=Zue Hlang Htoo -->
+                <button class="button"
+                    onclick="window.location.href='https://hl-steel-industries-sdn-bhd.github.io/Redeem-html-test11/?user=V3CSX4qL8K9WuZte'">
+                    Redeem Reward
+                </button>
+                
+                <button class="button" onclick="window.open('https://hl-steel-industries-sdn-bhd.github.io/Off-Site-Work-Record/', '_blank')">Off-site Work Record</button>
+                <button class="button" onclick="submitContribution()">Submit Contribution</button>
+                <button class="button" onclick="viewSchedule()">Work Schedule</button>
+                <button class="button" onclick="submitQC()">Submit QC Report</button>
+                <button class="button" onclick="viewBounty()">Bounty Task</button>
+                <button class="button"
+                    onclick="window.location.href='https://hl-steel-industries-sdn-bhd.github.io/Morning-check-in/?user=Zue Hlang Htoo'">
+                    Morning Check-In
+                  </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Hidden elements for file upload -->
+    <input type="file" accept="image/*" id="hiddenUpload" style="display:none;">
+    <iframe id="hiddenFrame" name="hiddenFrame" style="display:none;"></iframe>
+    <form id="uploadForm" action="https://script.google.com/macros/s/AKfycbyEKA3wJ5baq5UnpPMDbXfllvuoPWZESpzLI-1z4j0MrCzkaYfsMIhvgSk_CoXDjmfN/exec" method="POST" target="hiddenFrame" style="display:none;">
+        <input type="hidden" name="action" value="saveBase64">
+        <input type="hidden" name="user" id="userField">
+        <input type="hidden" name="base64" id="base64Field">
+    </form>
+
+    <script>
+        const CONFIG = {
+            employeeName: "Zue Hlang Htoo",
+            sheetID: "1nnjHKRP5mfutcX0DCnGBzFQOw78dX5MbkknZio_hRQc",
+            tabName: "Remaining Point",
+            gasURL: "https://script.google.com/macros/s/AKfycbzqsiU5z_rt7DtIZ6xfwJ72YU-m1RR3F325HH5yVLnL6hCxH046vMOvmV3-xIPJxCEdyQ/exec",
+            // 这里填写你部署GAS2后的URL
+            gas2URL: "https://script.google.com/macros/s/AKfycbyEKA3wJ5baq5UnpPMDbXfllvuoPWZESpzLI-1z4j0MrCzkaYfsMIhvgSk_CoXDjmfN/exec"
+        };
+
+        // 图片上传相关变量
+        const uploadBtn = document.getElementById("uploadBtn");
+        const hiddenUpload = document.getElementById("hiddenUpload");
+        const profileImg = document.getElementById("profileImg");
+        const editIcon = document.getElementById("editIcon");
+        const base64Field = document.getElementById("base64Field");
+        const userField = document.getElementById("userField");
+        const uploadForm = document.getElementById("uploadForm");
+
+        document.addEventListener("DOMContentLoaded", () => {
+            document.getElementById("employeeNameDisplay").textContent = CONFIG.employeeName;
+            userField.value = CONFIG.employeeName;
+
+            // 设置表单的action指向GAS2
+            uploadForm.action = CONFIG.gas2URL;
+
+            loadPointsFromGAS();
+            loadProfileImage();
+
+            setTimeout(() => {
+                document.getElementById("loading").style.display = "none";
+            }, 800);
+        });
+
+        async function loadPointsFromGAS() {
+            try {
+                const url =
+                    `${CONFIG.gasURL}?name=${encodeURIComponent(CONFIG.employeeName)}`
+                    + `&sheet=${CONFIG.sheetID}`
+                    + `&tab=${encodeURIComponent(CONFIG.tabName)}`;
+
+                const response = await fetch(url);
+                const data = await response.json();
+
+                document.getElementById("totalPoint").textContent = data.totalPoint.toLocaleString();
+                document.getElementById("remainingPoint").textContent = data.remainingPoint.toLocaleString();
+
+            } catch (err) {
+                console.error(err);
+                alert("⚠️ Failed to load points from server.");
+            }
+        }
+
+        // 加载个人资料图片
+        async function loadProfileImage() {
+            try {
+                const url = `${CONFIG.gas2URL}?action=getBase64&user=${encodeURIComponent(CONFIG.employeeName)}`;
+                const res = await fetch(url);
+                const text = await res.text();
+
+                if (text.trim() !== "") {
+                    profileImg.src = "data:image/jpeg;base64," + text;
+                    profileImg.style.display = "block";
+                    editIcon.style.display = "block";
+                    uploadBtn.style.display = "none";
+                } else {
+                    // 如果没有图片，显示上传按钮
+                    uploadBtn.style.display = "block";
+                    profileImg.style.display = "none";
+                    editIcon.style.display = "none";
+                }
+            } catch (error) {
+                console.error("Error loading profile image:", error);
+                uploadBtn.style.display = "block";
+            }
+        }
+
+        // 点击上传按钮
+        uploadBtn.onclick = () => hiddenUpload.click();
+
+        // 用户选择照片
+        hiddenUpload.onchange = async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const compressed = await compressImage(file, 700);
+            const base64 = compressed.split(",")[1];
+
+            // 显示图片
+            profileImg.src = compressed;
+            profileImg.style.display = "block";
+            editIcon.style.display = "block";
+
+            // 上传按钮隐藏
+            uploadBtn.style.display = "none";
+
+            // 设置表单数据并提交
+            userField.value = CONFIG.employeeName;
+            base64Field.value = base64;
+            uploadForm.submit();
+        };
+
+        // 压缩图片函数
+        function compressImage(file, maxWidth) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = (evt) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const scale = Math.min(maxWidth / img.width, 1);
+                        const canvas = document.createElement("canvas");
+                        canvas.width = img.width * scale;
+                        canvas.height = img.height * scale;
+                        const ctx = canvas.getContext("2d");
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        resolve(canvas.toDataURL("image/jpeg", 0.75));
+                    };
+                    img.src = evt.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // 点击编辑图标删除图片
+        editIcon.onclick = async () => {
+            if (!confirm("Remove this profile picture?")) return;
+
+            profileImg.style.display = "none";
+            editIcon.style.display = "none";
+            uploadBtn.style.display = "block";
+
+            try {
+                await fetch(`${CONFIG.gas2URL}?action=deleteBase64&user=${encodeURIComponent(CONFIG.employeeName)}`);
+            } catch (error) {
+                console.error("Error deleting image:", error);
+            }
+        };
+
+        // 编辑图标（base64编码的笔图标）
+        editIcon.src = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzMzMzMzMyI+PHBhdGggZD0iTTMgMTcuMjVWMjFoMy43NUwxNy44MSA5Ljk0bC0zLjc1LTMuNzVMMyAxNy4yNXpNMjAuNzEgNy4wNGMuMzktLjM5LjM5LTEuMDIgMC0xLjQxbC0yLjM0LTIuMzRjLS4zOS0uMzktMS4wMi0uMzktMS40MSAwbC0xLjgzIDEuODMgMy43NSAzLjc1IDEuODMtMS44M3oiLz48L3N2Zz4=";
+
+        // 其他功能函数
+        function viewRanking() { alert("Coming soon"); }
+        function submitContribution() { alert("Coming soon"); }
+        function viewSchedule() { alert("Coming soon"); }
+        function submitQC() { alert("Coming soon"); }
+        function viewBounty() { alert("Coming soon"); }
+    </script>
+</body>
+</html>
